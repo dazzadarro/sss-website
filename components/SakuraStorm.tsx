@@ -2,44 +2,83 @@
 
 import { useEffect, useRef } from 'react'
 
-// Senbonzakura-style interactive petal storm: petals ride a sweeping
-// vortex flow-field (the curling "wave" look of the thousand-cherry-
-// -blossoms art), scatter away from the cursor, and burst outward on
-// click. Rendered on canvas for performance.
+// Senbonzakura-style petal ribbon: instead of ambient drift, petals ride
+// along a sweeping S-curve band (top-right to bottom-left) and spiral
+// around it as they travel — the dense, sculpted "wave" look of
+// thousand-cherry-blossoms art — while still scattering off the cursor
+// and bursting outward on click. Rendered on canvas for performance.
 
 type Petal = {
-  x: number
-  y: number
+  t: number // progress along the curve, 0..1, wraps
+  speed: number
+  radius: number // lateral offset from the curve's spine
+  swirlAngle: number
+  swirlSpeed: number
   size: number
   spin: number
   spinSpeed: number
-  vx: number
-  vy: number
   opacity: number
   hue: number
-  phase: number
+  // transient cursor/burst displacement, decays back to 0
+  jx: number
+  jy: number
 }
 
 const PETAL_COLORS = ['#f0a8bc', '#e685a0', '#d97791', '#f8d0da', '#fce7ec']
 
-function makePetal(w: number, h: number): Petal {
+// Cubic bezier control points (fractions of width/height) describing the
+// sweeping band: enters top-right, arcs through the middle, exits
+// bottom-left — the classic senbonzakura diagonal.
+const CURVE = [
+  { x: 1.1, y: -0.1 },
+  { x: 0.75, y: 0.35 },
+  { x: 0.35, y: 0.55 },
+  { x: -0.1, y: 1.05 },
+]
+
+function bezierPoint(t: number, w: number, h: number) {
+  const [p0, p1, p2, p3] = CURVE
+  const mt = 1 - t
+  const a = mt * mt * mt
+  const b = 3 * mt * mt * t
+  const c = 3 * mt * t * t
+  const d = t * t * t
   return {
-    x: Math.random() * w,
-    y: Math.random() * h,
-    size: 6 + Math.random() * 11,
-    spin: Math.random() * Math.PI * 2,
-    spinSpeed: (Math.random() - 0.5) * 0.05,
-    vx: 0,
-    vy: 0,
-    opacity: 0.45 + Math.random() * 0.45,
-    hue: Math.floor(Math.random() * PETAL_COLORS.length),
-    phase: Math.random() * Math.PI * 2,
+    x: (a * p0.x + b * p1.x + c * p2.x + d * p3.x) * w,
+    y: (a * p0.y + b * p1.y + c * p2.y + d * p3.y) * h,
   }
 }
 
-function drawPetal(ctx: CanvasRenderingContext2D, p: Petal) {
+function bezierTangent(t: number, w: number, h: number) {
+  const eps = 0.001
+  const a = bezierPoint(Math.max(0, t - eps), w, h)
+  const b = bezierPoint(Math.min(1, t + eps), w, h)
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const len = Math.sqrt(dx * dx + dy * dy) || 1
+  return { tx: dx / len, ty: dy / len, nx: -dy / len, ny: dx / len }
+}
+
+function makePetal(): Petal {
+  return {
+    t: Math.random(),
+    speed: 0.035 + Math.random() * 0.03,
+    radius: (Math.random() - 0.5) * 2,
+    swirlAngle: Math.random() * Math.PI * 2,
+    swirlSpeed: 1.4 + Math.random() * 2.2,
+    size: 5 + Math.random() * 9,
+    spin: Math.random() * Math.PI * 2,
+    spinSpeed: (Math.random() - 0.5) * 0.08,
+    opacity: 0.5 + Math.random() * 0.4,
+    hue: Math.floor(Math.random() * PETAL_COLORS.length),
+    jx: 0,
+    jy: 0,
+  }
+}
+
+function drawPetal(ctx: CanvasRenderingContext2D, x: number, y: number, p: Petal) {
   ctx.save()
-  ctx.translate(p.x, p.y)
+  ctx.translate(x, y)
   ctx.rotate(p.spin)
   ctx.globalAlpha = p.opacity
   ctx.fillStyle = PETAL_COLORS[p.hue]
@@ -52,7 +91,7 @@ function drawPetal(ctx: CanvasRenderingContext2D, p: Petal) {
   ctx.restore()
 }
 
-export default function SakuraStorm({ density = 90 }: { density?: number }) {
+export default function SakuraStorm({ density = 140 }: { density?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const mouseRef = useRef({ x: -9999, y: -9999, active: false })
   const burstsRef = useRef<{ x: number; y: number; life: number }[]>([])
@@ -78,7 +117,7 @@ export default function SakuraStorm({ density = 90 }: { density?: number }) {
 
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const count = prefersReduced ? 0 : density
-    const petals: Petal[] = Array.from({ length: count }, () => makePetal(width, height))
+    const petals: Petal[] = Array.from({ length: count }, makePetal)
 
     const onMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect()
@@ -98,88 +137,66 @@ export default function SakuraStorm({ density = 90 }: { density?: number }) {
     canvas.addEventListener('pointerdown', onClick)
 
     let raf = 0
-    let t = 0
 
     const tick = () => {
-      t += 0.012
       ctx.clearRect(0, 0, width, height)
-
       const mouse = mouseRef.current
-      // two slow-drifting vortex centers sweep across the hero, giving
-      // the large curling "wave" shape seen in senbonzakura art
-      const vortices = [
-        {
-          x: width * (0.3 + 0.22 * Math.sin(t * 0.35)),
-          y: height * (0.45 + 0.18 * Math.cos(t * 0.3)),
-          strength: 1,
-          spin: 1,
-        },
-        {
-          x: width * (0.72 + 0.18 * Math.cos(t * 0.28 + 1.4)),
-          y: height * (0.55 + 0.2 * Math.sin(t * 0.32 + 1.1)),
-          strength: 0.75,
-          spin: -1,
-        },
-      ]
+      const bandWidth = Math.min(width, height) * 0.42
 
       for (const p of petals) {
-        let vx = 0
-        let vy = 0.35 // gentle overall fall
-
-        for (const v of vortices) {
-          const dx = p.x - v.x
-          const dy = p.y - v.y
-          const dist = Math.sqrt(dx * dx + dy * dy) + 0.001
-          const falloff = Math.exp(-dist / (width * 0.42)) * v.strength
-          // tangential (swirl) component
-          vx += (-dy / dist) * falloff * v.spin * 1.6
-          vy += (dx / dist) * falloff * v.spin * 1.6
+        p.t += p.speed * 0.016
+        if (p.t > 1) {
+          p.t -= 1
+          p.radius = (Math.random() - 0.5) * 2
         }
-
-        // fine wind ripple so the swirl isn't perfectly smooth
-        vx += Math.sin(p.phase + t * 1.3 + p.y * 0.01) * 0.3
-        vy += Math.cos(p.phase + t * 1.1 + p.x * 0.01) * 0.2
-
-        // scatter away from the cursor
-        if (mouse.active) {
-          const dx = p.x - mouse.x
-          const dy = p.y - mouse.y
-          const dist = Math.sqrt(dx * dx + dy * dy) + 0.001
-          const radius = 110
-          if (dist < radius) {
-            const force = (1 - dist / radius) * 3.5
-            vx += (dx / dist) * force
-            vy += (dy / dist) * force
-          }
-        }
-
-        // click bursts
-        for (const b of burstsRef.current) {
-          const dx = p.x - b.x
-          const dy = p.y - b.y
-          const dist = Math.sqrt(dx * dx + dy * dy) + 0.001
-          const radius = 220
-          if (dist < radius) {
-            const force = (1 - dist / radius) * 6 * b.life
-            vx += (dx / dist) * force
-            vy += (dy / dist) * force
-          }
-        }
-
-        p.vx += (vx - p.vx) * 0.09
-        p.vy += (vy - p.vy) * 0.09
-        p.x += p.vx
-        p.y += p.vy
+        p.swirlAngle += p.swirlSpeed * 0.016
         p.spin += p.spinSpeed
 
-        if (p.y > height + 20) {
-          p.x = Math.random() * width
-          p.y = -20
-        }
-        if (p.x < -40) p.x = width + 20
-        if (p.x > width + 40) p.x = -20
+        const center = bezierPoint(p.t, width, height)
+        const { nx, ny } = bezierTangent(p.t, width, height)
 
-        drawPetal(ctx, p)
+        // taper the ribbon's width near its two ends so it reads as a
+        // sweeping band rather than a uniform strip
+        const taper = Math.sin(Math.min(1, p.t) * Math.PI)
+        const lateral = p.radius * bandWidth * (0.25 + 0.75 * taper)
+        const swirl = Math.sin(p.swirlAngle) * bandWidth * 0.12 * taper
+
+        let x = center.x + nx * (lateral + swirl)
+        let y = center.y + ny * (lateral + swirl)
+
+        // cursor scatter (push the petal's transient jitter, which eases back)
+        if (mouse.active) {
+          const dx = x - mouse.x
+          const dy = y - mouse.y
+          const dist = Math.sqrt(dx * dx + dy * dy) + 0.001
+          const radius = 120
+          if (dist < radius) {
+            const force = (1 - dist / radius) * 55
+            p.jx += (dx / dist) * force * 0.12
+            p.jy += (dy / dist) * force * 0.12
+          }
+        }
+
+        for (const b of burstsRef.current) {
+          const dx = x - b.x
+          const dy = y - b.y
+          const dist = Math.sqrt(dx * dx + dy * dy) + 0.001
+          const radius = 240
+          if (dist < radius) {
+            const force = (1 - dist / radius) * 90 * b.life
+            p.jx += (dx / dist) * force * 0.12
+            p.jy += (dy / dist) * force * 0.12
+          }
+        }
+
+        p.jx *= 0.9
+        p.jy *= 0.9
+        x += p.jx
+        y += p.jy
+
+        if (x > -40 && x < width + 40 && y > -40 && y < height + 40) {
+          drawPetal(ctx, x, y, p)
+        }
       }
 
       burstsRef.current = burstsRef.current

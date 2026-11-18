@@ -13,9 +13,9 @@ export default function Hero() {
       <div className="absolute inset-0 bg-white" />
       <div className="absolute inset-0 bg-hero-gradient" />
 
-      {/* Radial glow blobs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sakura-300/20 rounded-full blur-3xl animate-glow-pulse" />
-      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-sakura-400/15 rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: '1.5s' }} />
+      {/* Radial glow blobs, kept clear of the top corners so they don't wash out the sakura branches */}
+      <div className="absolute top-1/2 left-1/3 w-96 h-96 bg-sakura-300/20 rounded-full blur-3xl animate-glow-pulse" />
+      <div className="absolute bottom-1/4 right-1/3 w-80 h-80 bg-sakura-400/15 rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: '1.5s' }} />
 
       {/* Cityscape + drifting sakura petals, echoing the original hero composite */}
       <HeroVisual />
