@@ -23,7 +23,7 @@ export default function Footer() {
               {company.tagline}
             </p>
             <p className="text-white/30 text-xs mt-4">
-              Est. {company.established} · Singapore
+              Est. {company.founded} · Singapore
             </p>
           </div>
 

@@ -4,6 +4,8 @@ export const siteContent = {
     shortName: 'SSS',
     tagline: 'Reliable. Innovative. Tailored IT Services for Seamless Digital Transformation.',
     founded: '1990',
+    fullName: 'Sakura System Service Pte Ltd',
+    registration: 'UEN: XXXXXXXXXX',
     domain: 'sss-sng.com.sg',
     description:
       'Since 1990, Sakura System Service has been the trusted IT partner for Japanese companies expanding across ASEAN. We deliver reliable, tailored technology solutions that bridge cultures and drive growth.',
