@@ -10,27 +10,31 @@ const config: Config = {
     extend: {
       colors: {
         navy: {
-          950: '#04070f',
-          900: '#060d1a',
-          800: '#0a1428',
-          700: '#0f1e3d',
+          950: '#1a1a1a',
+          900: '#262626',
+          800: '#404040',
+          700: '#525252',
         },
         sakura: {
+          50: '#fff1f3',
+          100: '#ffe4e8',
+          200: '#fecdd6',
           300: '#fda4af',
           400: '#fb7185',
           500: '#f43f5e',
+          600: '#e11d48',
         },
         glow: {
-          blue: '#60a5fa',
           pink: '#f9a8d4',
         },
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'hero-gradient': 'radial-gradient(ellipse at 20% 50%, #1e3a5f 0%, #060d1a 60%)',
+        'hero-gradient': 'radial-gradient(ellipse at 20% 30%, #ffe4e8 0%, #ffffff 60%)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        heading: ['"Baloo 2"', 'Inter', 'system-ui', 'sans-serif'],
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',

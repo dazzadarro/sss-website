@@ -5,29 +5,34 @@ export const siteContent = {
     tagline: 'Reliable. Innovative. Tailored IT Services for Seamless Digital Transformation.',
     founded: '1990',
     fullName: 'Sakura System Service Pte Ltd',
-    registration: 'UEN: XXXXXXXXXX',
+    registration: 'Personal Data Protection Act',
     domain: 'sss-sng.com.sg',
     description:
-      'Since 1990, Sakura System Service has been the trusted IT partner for Japanese companies expanding across ASEAN. We deliver reliable, tailored technology solutions that bridge cultures and drive growth.',
+      'Since 1990, Sakura System Service has been providing top-tier IT solutions to Japanese companies expanding in ASEAN.',
   },
 
   nav: {
     links: [
-      { label: 'Services', href: '/services' },
+      { label: 'Home', href: '/' },
+      { label: 'Our Services', href: '#services' },
       { label: 'Client Stories', href: '/client-stories' },
-      { label: 'About', href: '/about' },
       { label: 'Careers', href: '/careers' },
-      { label: 'Contact', href: '/contact' },
+      { label: 'About Us', href: '#about' },
     ],
   },
 
   hero: {
-    headline: 'IT Solutions Built for',
-    headlineAccent: 'Japanese Business in ASEAN',
+    headline: 'Empowering Your Business with',
+    headlineAccent: 'Future-Ready IT Solutions',
     subheadline:
-      'Since 1990, Sakura System Service has been the trusted technology partner for Japanese companies expanding across Southeast Asia.',
-    cta: 'Explore Our Services',
-    ctaSecondary: 'Contact Us',
+      'Reliable. Innovative. Tailored IT Services for Seamless Digital Transformation.',
+    cta: 'Our Services',
+    ctaSecondary: 'Get In Touch',
+  },
+
+  about: {
+    body:
+      "Since 1990, Sakura System Service has been providing top-tier IT solutions to Japanese companies expanding in ASEAN. From system development to cloud solutions, we tailor our services to meet your industry's needs.",
   },
 
   stats: [
@@ -42,15 +47,15 @@ export const siteContent = {
       id: 'office-it',
       title: 'Office IT Services',
       description:
-        'End-to-end IT infrastructure support — networks, hardware, helpdesk, and maintenance tailored for Japanese office environments.',
+        'End-to-end support for office networks, hardware, and security.',
       icon: 'Monitor',
       featured: true,
     },
     {
       id: 'software',
-      title: 'Software & Applications',
+      title: 'Software & Application',
       description:
-        'Custom software development and application management designed around your unique business workflows.',
+        'Custom apps and systems built around your specific business needs.',
       icon: 'Code2',
       featured: false,
     },
@@ -58,7 +63,7 @@ export const siteContent = {
       id: 'data-analytics',
       title: 'Data Analytics',
       description:
-        'Transform raw data into actionable insights. We build dashboards and analytics pipelines that drive smarter decisions.',
+        'We use data to support decisions with actionable insights.',
       icon: 'BarChart3',
       featured: false,
     },
@@ -66,32 +71,43 @@ export const siteContent = {
       id: 'rpa',
       title: 'Automation (RPA)',
       description:
-        'Eliminate repetitive manual work with Robotic Process Automation. Free your team to focus on what matters.',
+        'Robotic process automation that takes over repetitive tasks.',
       icon: 'Zap',
       featured: false,
     },
     {
       id: 'outsourcing',
-      title: 'IT Outsourcing',
+      title: 'Outsourcing',
       description:
-        'On-demand IT staffing and managed services. Scale your IT capability without the overhead.',
+        'IT professionals on demand for project and operational needs.',
       icon: 'Users',
       featured: false,
     },
   ],
 
   contact: {
-    address: 'Singapore',
-    email: 'info@sss-sng.com.sg',
-    phone: '+65 XXXX XXXX',
-    hours: 'Mon–Fri, 9:00am – 6:00pm',
+    address: '77 Science Park Drive, #03-10 Cintech III, Singapore 118256',
+    email: '',
+    phone: '(65) 6773 0500',
+    fax: '(65) 6773 0318',
+    hours: 'Mon – Fri 9:00am – 6:00pm',
+    hoursClosed: 'Sat / Sun / PH Closed',
   },
 
   footer: {
-    links: [
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Contact', href: '/contact' },
+    companyInfo: [
+      { label: 'About Us', href: '#about' },
+      { label: 'Careers', href: '/careers' },
+      { label: 'Personal Data Protection Act', href: '/pdpa' },
+      { label: 'Credits', href: '/credits' },
     ],
-    copy: `© ${new Date().getFullYear()} Sakura System Service Pte Ltd. All rights reserved.`,
+    solutionServices: [
+      { label: 'Office IT Services', href: '/services/office-it' },
+      { label: 'Software & Application', href: '/services/software' },
+      { label: 'Data Analytics', href: '/services/data-analytics' },
+      { label: 'Automation (RPA)', href: '/services/rpa' },
+      { label: 'Outsourcing', href: '/services/outsourcing' },
+    ],
+    copy: 'Copyright © 2025 Sakura System Service Pte Ltd. All rights reserved.',
   },
 }

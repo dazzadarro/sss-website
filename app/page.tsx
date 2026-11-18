@@ -1,14 +1,16 @@
 import Hero from '@/components/Hero'
-import StatsSection from '@/components/StatsSection'
+import AboutSection from '@/components/AboutSection'
 import ServicesGrid from '@/components/ServicesGrid'
+import StatsSection from '@/components/StatsSection'
 import CTASection from '@/components/CTASection'
 
 export default function HomePage() {
   return (
     <main>
       <Hero />
-      <StatsSection />
+      <AboutSection />
       <ServicesGrid />
+      <StatsSection />
       <CTASection />
     </main>
   )
