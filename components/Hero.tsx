@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import { siteContent } from '@/lib/content'
+import HeroVisual from './HeroVisual'
 
 export default function Hero() {
   return (
@@ -16,14 +17,8 @@ export default function Hero() {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sakura-300/20 rounded-full blur-3xl animate-glow-pulse" />
       <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-sakura-400/15 rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: '1.5s' }} />
 
-      {/* Grid pattern overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: `linear-gradient(rgba(244,63,94,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(244,63,94,0.3) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px',
-        }}
-      />
+      {/* Cityscape + drifting sakura petals, echoing the original hero composite */}
+      <HeroVisual />
 
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
