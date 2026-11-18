@@ -1,7 +1,13 @@
 // Stylized sakura branch silhouette, anchored to one corner, as the
 // "tree" the storm of petals reads as blowing off of. Pure geometric
 // line-art in the muted plum-rose palette — no raster asset needed.
-export default function SakuraBranch({ className = '' }: { className?: string }) {
+export default function SakuraBranch({
+  className = '',
+  style,
+}: {
+  className?: string
+  style?: React.CSSProperties
+}) {
   const blossom = (cx: number, cy: number, r: number, opacity: number) => (
     <g opacity={opacity}>
       {[0, 72, 144, 216, 288].map((deg) => (
@@ -23,6 +29,7 @@ export default function SakuraBranch({ className = '' }: { className?: string })
     <svg
       viewBox="0 0 400 400"
       className={className}
+      style={style}
       aria-hidden="true"
     >
       {/* gnarled branch */}

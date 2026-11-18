@@ -23,11 +23,12 @@ const BUILDINGS = [
 export default function HeroVisual() {
   return (
     <div className="absolute inset-0 overflow-hidden select-none">
-      {/* City skyline silhouette, bottom-anchored, low-contrast wireframe */}
+      {/* City skyline silhouette, bottom-anchored, low-contrast wireframe,
+          echoing the original hero's digital-cityscape backdrop */}
       <svg
         viewBox="0 0 520 320"
         preserveAspectRatio="xMidYMax slice"
-        className="absolute bottom-0 left-0 w-full h-[60%] opacity-[0.07] pointer-events-none"
+        className="absolute bottom-0 left-0 w-full h-[65%] opacity-[0.09] pointer-events-none"
       >
         {BUILDINGS.map((b, i) => (
           <rect
@@ -56,12 +57,17 @@ export default function HeroVisual() {
         )}
       </svg>
 
-      {/* Sakura branch anchor, top-right */}
-      <SakuraBranch className="absolute -top-6 -right-6 w-64 h-64 md:w-96 md:h-96 pointer-events-none" />
+      {/* Sakura branches drooping from both top corners, matching the
+          real site's hero framing */}
+      <SakuraBranch className="absolute -top-8 -right-10 w-64 h-64 md:w-[26rem] md:h-[26rem] pointer-events-none" />
+      <SakuraBranch
+        className="absolute -top-8 -left-10 w-64 h-64 md:w-[26rem] md:h-[26rem] pointer-events-none"
+        style={{ transform: 'scaleX(-1)' }}
+      />
 
-      {/* Interactive senbonzakura-style petal storm: cursor scatters
+      {/* Interactive senbonzakura-style petal vortex: cursor scatters
           petals, click bursts them outward */}
-      <SakuraStorm density={60} />
+      <SakuraStorm density={90} />
     </div>
   )
 }

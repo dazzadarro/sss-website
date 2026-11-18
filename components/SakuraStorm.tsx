@@ -2,48 +2,38 @@
 
 import { useEffect, useRef } from 'react'
 
-// Senbonzakura-style interactive petal storm: a dense swirl of sakura
-// petals that react to the cursor (scattering away as you move through
-// them) and burst outward on click, rendered on a canvas for performance.
-// A stylized sakura branch sits in the corner as the "tree" anchor.
+// Senbonzakura-style interactive petal storm: petals ride a sweeping
+// vortex flow-field (the curling "wave" look of the thousand-cherry-
+// -blossoms art), scatter away from the cursor, and burst outward on
+// click. Rendered on canvas for performance.
 
 type Petal = {
   x: number
   y: number
   size: number
-  angle: number
   spin: number
   spinSpeed: number
-  baseVX: number
-  baseVY: number
   vx: number
   vy: number
-  sway: number
-  swaySpeed: number
   opacity: number
   hue: number
+  phase: number
 }
 
-const PETAL_COLORS = ['#f0a8bc', '#e685a0', '#d97791', '#f8d0da']
+const PETAL_COLORS = ['#f0a8bc', '#e685a0', '#d97791', '#f8d0da', '#fce7ec']
 
-function makePetal(w: number, h: number, seed = Math.random()): Petal {
-  const size = 6 + seed * 10
-  const angle = Math.random() * Math.PI * 2
+function makePetal(w: number, h: number): Petal {
   return {
     x: Math.random() * w,
-    y: Math.random() * h - h,
-    size,
-    angle,
+    y: Math.random() * h,
+    size: 6 + Math.random() * 11,
     spin: Math.random() * Math.PI * 2,
-    spinSpeed: (Math.random() - 0.5) * 0.04,
-    baseVX: 0.6 + Math.random() * 0.9,
-    baseVY: 0.5 + Math.random() * 0.8,
+    spinSpeed: (Math.random() - 0.5) * 0.05,
     vx: 0,
     vy: 0,
-    sway: Math.random() * Math.PI * 2,
-    swaySpeed: 0.02 + Math.random() * 0.02,
-    opacity: 0.45 + Math.random() * 0.4,
+    opacity: 0.45 + Math.random() * 0.45,
     hue: Math.floor(Math.random() * PETAL_COLORS.length),
+    phase: Math.random() * Math.PI * 2,
   }
 }
 
@@ -54,7 +44,6 @@ function drawPetal(ctx: CanvasRenderingContext2D, p: Petal) {
   ctx.globalAlpha = p.opacity
   ctx.fillStyle = PETAL_COLORS[p.hue]
   ctx.beginPath()
-  // simple petal shape: two curved lobes meeting at tip
   const s = p.size
   ctx.moveTo(0, -s)
   ctx.bezierCurveTo(s * 0.8, -s * 0.6, s * 0.6, s * 0.4, 0, s)
@@ -63,7 +52,7 @@ function drawPetal(ctx: CanvasRenderingContext2D, p: Petal) {
   ctx.restore()
 }
 
-export default function SakuraStorm({ density = 55 }: { density?: number }) {
+export default function SakuraStorm({ density = 90 }: { density?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const mouseRef = useRef({ x: -9999, y: -9999, active: false })
   const burstsRef = useRef<{ x: number; y: number; life: number }[]>([])
@@ -76,15 +65,14 @@ export default function SakuraStorm({ density = 55 }: { density?: number }) {
 
     let width = canvas.clientWidth
     let height = canvas.clientHeight
-    let dpr = Math.min(window.devicePixelRatio || 1, 2)
 
     const resize = () => {
       width = canvas.clientWidth
       height = canvas.clientHeight
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
       canvas.width = width * dpr
       canvas.height = height * dpr
-      ctx.scale(dpr, dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
     resize()
 
@@ -110,17 +98,47 @@ export default function SakuraStorm({ density = 55 }: { density?: number }) {
     canvas.addEventListener('pointerdown', onClick)
 
     let raf = 0
+    let t = 0
+
     const tick = () => {
+      t += 0.012
       ctx.clearRect(0, 0, width, height)
 
       const mouse = mouseRef.current
-      for (const p of petals) {
-        p.sway += p.swaySpeed
-        p.spin += p.spinSpeed
+      // two slow-drifting vortex centers sweep across the hero, giving
+      // the large curling "wave" shape seen in senbonzakura art
+      const vortices = [
+        {
+          x: width * (0.3 + 0.22 * Math.sin(t * 0.35)),
+          y: height * (0.45 + 0.18 * Math.cos(t * 0.3)),
+          strength: 1,
+          spin: 1,
+        },
+        {
+          x: width * (0.72 + 0.18 * Math.cos(t * 0.28 + 1.4)),
+          y: height * (0.55 + 0.2 * Math.sin(t * 0.32 + 1.1)),
+          strength: 0.75,
+          spin: -1,
+        },
+      ]
 
-        // base senbonzakura drift: fast diagonal wind
-        let vx = p.baseVX + Math.sin(p.sway) * 0.4
-        let vy = p.baseVY + Math.cos(p.sway * 0.7) * 0.2
+      for (const p of petals) {
+        let vx = 0
+        let vy = 0.35 // gentle overall fall
+
+        for (const v of vortices) {
+          const dx = p.x - v.x
+          const dy = p.y - v.y
+          const dist = Math.sqrt(dx * dx + dy * dy) + 0.001
+          const falloff = Math.exp(-dist / (width * 0.42)) * v.strength
+          // tangential (swirl) component
+          vx += (-dy / dist) * falloff * v.spin * 1.6
+          vy += (dx / dist) * falloff * v.spin * 1.6
+        }
+
+        // fine wind ripple so the swirl isn't perfectly smooth
+        vx += Math.sin(p.phase + t * 1.3 + p.y * 0.01) * 0.3
+        vy += Math.cos(p.phase + t * 1.1 + p.x * 0.01) * 0.2
 
         // scatter away from the cursor
         if (mouse.active) {
@@ -129,13 +147,13 @@ export default function SakuraStorm({ density = 55 }: { density?: number }) {
           const dist = Math.sqrt(dx * dx + dy * dy) + 0.001
           const radius = 110
           if (dist < radius) {
-            const force = (1 - dist / radius) * 3.2
+            const force = (1 - dist / radius) * 3.5
             vx += (dx / dist) * force
             vy += (dy / dist) * force
           }
         }
 
-        // bursts push petals outward with decaying force
+        // click bursts
         for (const b of burstsRef.current) {
           const dx = p.x - b.x
           const dy = p.y - b.y
@@ -148,16 +166,18 @@ export default function SakuraStorm({ density = 55 }: { density?: number }) {
           }
         }
 
-        p.vx += (vx - p.vx) * 0.08
-        p.vy += (vy - p.vy) * 0.08
+        p.vx += (vx - p.vx) * 0.09
+        p.vy += (vy - p.vy) * 0.09
         p.x += p.vx
         p.y += p.vy
+        p.spin += p.spinSpeed
 
-        if (p.y > height + 20 || p.x > width + 40) {
-          p.x = -20 - Math.random() * 60
-          p.y = Math.random() * height * 0.6 - height * 0.2
+        if (p.y > height + 20) {
+          p.x = Math.random() * width
+          p.y = -20
         }
-        if (p.x < -60) p.x = width + 20
+        if (p.x < -40) p.x = width + 20
+        if (p.x > width + 40) p.x = -20
 
         drawPetal(ctx, p)
       }
