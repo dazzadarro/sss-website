@@ -65,7 +65,7 @@ export default function ServicesGrid() {
             </div>
 
             <Link
-              href={`/services/${featured.id}`}
+              href={`/${featured.slug}`}
               className="relative z-10 mt-6 inline-flex items-center gap-2 text-sakura-500 text-sm font-medium hover:gap-3 transition-all"
             >
               Learn more <ArrowRight size={14} />
@@ -93,7 +93,7 @@ export default function ServicesGrid() {
                 </div>
 
                 <Link
-                  href={`/services/${service.id}`}
+                  href={`/${service.slug}`}
                   className="relative z-10 mt-4 inline-flex items-center gap-2 text-sakura-500 text-xs font-medium hover:gap-3 transition-all"
                 >
                   Learn more <ArrowRight size={12} />

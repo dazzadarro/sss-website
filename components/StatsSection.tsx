@@ -24,7 +24,7 @@ export default function StatsSection() {
                 viewport={{ once: true }}
                 className="text-center"
               >
-                <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-sakura-500 to-sakura-300 bg-clip-text text-transparent mb-2">
+                <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-sakura-600 to-sakura-400 bg-clip-text text-transparent mb-2 tabular-nums">
                   {stat.value}
                 </div>
                 <div className="text-sm text-navy-900/50">{stat.label}</div>
